@@ -1,0 +1,20 @@
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: enterprise-ai-api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+# Add provider settings through environment variables or a secret manager.
+# Never commit API keys or credentials here.

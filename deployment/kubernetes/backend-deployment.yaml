@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-ai-api
+  namespace: fde-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: enterprise-ai-api
+  template:
+    metadata:
+      labels:
+        app: enterprise-ai-api
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: api
+          image: enterprise-ai-api:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enterprise-ai-api
+  namespace: fde-lab
+spec:
+  selector:
+    app: enterprise-ai-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+  type: ClusterIP
